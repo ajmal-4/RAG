@@ -6,3 +6,15 @@
 
 # Ruff Cache
 .ruff_cache
+
+# Environment vars
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Workout Files
+try/
+try.ipynb
+try.py
