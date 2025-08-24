@@ -16,6 +16,8 @@ env_path = project_dir / ".env"
 class Settings(BaseSettings):
     api_key: str
 
+    database_url: str
+
     supported_files: List[str]
 
     is_docling_retriever: bool

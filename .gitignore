@@ -18,3 +18,7 @@ __pycache__/
 try/
 try.ipynb
 try.py
+
+# Alembic
+alembic/__pycache__/
+alembic/*.pyc
