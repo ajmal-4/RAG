@@ -1,5 +1,6 @@
 aiofiles==24.1.0
 alembic==1.16.4
+autogen==0.9.9
 docling==2.47.0
 fastapi==0.115.14
 langchain==0.3.27

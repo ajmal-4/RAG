@@ -1,8 +1,8 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Qdrant
 
 from app.core.config import settings
+from app.core.embedding import get_embeddings
 from app.services.docling_service import DoclingService
 
 
@@ -15,10 +15,7 @@ class ExtractionService:
             chunk_size=settings.chunk_split_size,
             chunk_overlap=settings.chunk_split_overlap,
         )
-        self.embeddings = HuggingFaceEmbeddings(
-            model_name=settings.embedding_model_name,
-            model_kwargs={"device": settings.embed_device},
-        )
+        self.embeddings = get_embeddings()
         self._load_vector_db_creds()
 
     def _load_vector_db_creds(self):

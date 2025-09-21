@@ -4,15 +4,18 @@ from pathlib import Path
 
 import aiofiles
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from fastapi.responses import StreamingResponse
 
 from app.api.deps import require_api_key
 from app.core.config import settings
-from app.schemas.rag_api_schema import IngestResponse
+from app.schemas.rag_api_schema import IngestResponse, ChatRequest
 from app.services.extraction_service import ExtractionService
+from app.services.llm_service import LLMService
 
 router = APIRouter()
 
 extraction_service = ExtractionService()
+llm_service = LLMService()
 
 
 @router.post(
@@ -40,3 +43,22 @@ async def ingest(
     )
 
     return IngestResponse(collection=collection, total_chunks=ingested_chunks)
+
+@router.post("/chat")
+async def chat(request: ChatRequest):
+    return StreamingResponse(
+        llm_service.generate_simple_response(request), 
+        media_type="text/plain"
+    )
+
+@router.post("/kmeans-summary")
+async def kmeans_summary():
+    result = await llm_service.summarize_with_kmeans_clustering(
+        collection_name=settings.qdrant_collection_name,
+        filters=None,
+        n_clusters=2,
+        top_k=1,
+        return_vectors=False
+    )
+
+    return result

@@ -36,6 +36,24 @@ class Settings(BaseSettings):
     qdrant_url: str
     qdrant_collection_name: str
 
+    retrieval_chunk_limit: int
+
+    openrouter_api_key: str
+
+    # Define model registry
+    llm_models: dict = {
+        "deepseek": {
+            "provider": "openrouter",
+            "base_url": "https://openrouter.ai/api/v1",
+            "model": "deepseek/deepseek-chat-v3.1:free",
+        },
+        "gpt4": {
+            "provider": "openrouter",
+            "base_url": "https://openrouter.ai/api/v1",
+            "model": "openai/gpt-4o-mini",
+        }
+    }
+
     class Config:
         env_file = env_path
         case_sensitive = False
