@@ -16,6 +16,21 @@ env_path = project_dir / ".env"
 class Settings(BaseSettings):
     api_key: str
 
+    environment: str
+    allowed_origins: List[str]
+    allow_credentials: bool
+    allowed_methods: List[str]
+    allowed_headers: List[str]
+
+    # Logging Configuration
+    log_path: str
+    log_rotation: str
+    log_retention: str
+    log_compression: str
+    log_enqueue: bool
+    log_serialize: bool
+    log_level: str
+
     database_url: str
 
     supported_files: List[str]
