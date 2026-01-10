@@ -1,7 +1,8 @@
-from typing import List, Dict, Any, AsyncGenerator as Ag
+from typing import List, Dict, Any, AsyncGenerator
 
 import numpy as np
 from sklearn.cluster import KMeans
+from langchain_ollama import ChatOllama
 
 from app.core.llm import get_llm, get_model_id
 from app.schemas.rag_api_schema import ChatRequest
@@ -12,7 +13,7 @@ class LLMService:
     def __init__(self):
         self.vector_db_agent = VectorDbAgent()
 
-    async def generate_simple_response(self, request: ChatRequest) -> Ag[str]:
+    async def generate_simple_response(self, request: ChatRequest) -> AsyncGenerator[str, None]:
         model_name = request.model_name or "deepseek"
         llm_client = get_llm(model_name)
         model_id = get_model_id(model_name)
@@ -31,6 +32,18 @@ class LLMService:
                 full_response += delta
                 # yield chunk asynchronously
                 yield delta
+
+    async def generate_response(self, request: ChatRequest) -> AsyncGenerator[str, None]:
+        model_name = request.model_name or "qwen"
+        llm_client = get_llm(model_name)
+
+        if isinstance(llm_client, ChatOllama):
+
+            async for chunk in llm_client.astream(
+                "Hi"
+            ):
+
+                yield str(chunk)
 
     async def summarize_with_kmeans_clustering(
         self, 

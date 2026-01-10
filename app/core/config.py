@@ -42,6 +42,14 @@ class Settings(BaseSettings):
 
     # Define model registry
     llm_models: dict = {
+        # Locally hosted models 
+        "qwen": {
+            "provider": "local",
+            "base_url": "http://localhost:11434",
+            "model": "qwen2.5:3b-instruct",
+        },
+        
+        # OpenRouter models (Cloud hosted)
         "deepseek": {
             "provider": "openrouter",
             "base_url": "https://openrouter.ai/api/v1",

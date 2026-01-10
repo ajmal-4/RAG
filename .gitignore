@@ -22,3 +22,5 @@ try.py
 # Alembic
 alembic/__pycache__/
 alembic/*.pyc
+
+.dist/
