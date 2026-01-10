@@ -7,10 +7,16 @@ fastapi==0.115.14
 langchain==0.3.27
 langchain-huggingface==0.3.1
 loguru==0.7.3
+langchain==1.2.3
+langchain-community==0.4.1
+langchain-huggingface==1.2.0
+langchain-ollama==1.0.1
+openai==2.15.0
 psycopg2-binary==2.9.10
 pydantic-settings==2.10.1
 python-multipart==0.0.20
 qdrant-client==1.15.1
 torch==2.8.0
 transformers==4.55.4
+scikit_learn==1.8.0
 uvicorn==0.35.0
