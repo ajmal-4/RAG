@@ -2,9 +2,10 @@ from typing import List, Dict, Any, AsyncGenerator
 
 import numpy as np
 from sklearn.cluster import KMeans
-from langchain_ollama import ChatOllama
+from langchain.messages import SystemMessage, HumanMessage
 
 from app.core.llm import get_llm, get_model_id
+from app.services.llm_utils import load_prompt
 from app.schemas.rag_api_schema import ChatRequest
 from app.services.vector_db_agent import VectorDbAgent
 
@@ -37,13 +38,14 @@ class LLMService:
         model_name = request.model_name or "qwen"
         llm_client = get_llm(model_name)
 
-        if isinstance(llm_client, ChatOllama):
+        system_prompt = load_prompt("simple_response")["SYSTEM"]
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=request.question)
+        ]
 
-            async for chunk in llm_client.astream(
-                "Hi"
-            ):
-
-                yield str(chunk)
+        async for token in llm_client.stream(messages):
+            yield token
 
     async def summarize_with_kmeans_clustering(
         self, 

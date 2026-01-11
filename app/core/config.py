@@ -55,6 +55,8 @@ class Settings(BaseSettings):
 
     openrouter_api_key: str
 
+    prompt_path: str = "app/prompts"
+
     # Define model registry
     llm_models: dict = {
         # Locally hosted models 

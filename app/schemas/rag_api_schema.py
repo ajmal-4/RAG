@@ -16,4 +16,6 @@ class SummaryRequest(BaseModel):
 
 class IngestResponse(BaseModel):
     collection: str = Field(..., description="Collection of the vector db")
-    total_chunks: int = Field(..., description="Total chunks ingested")
+    job_id: str = Field(..., description="Ingestion job ID")
+    ingestion_status: str = Field(..., description="Ingestion status")
+    ingestion_message: str = Field(..., description="Ingestion message")

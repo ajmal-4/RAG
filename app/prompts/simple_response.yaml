@@ -1,0 +1,16 @@
+SYSTEM: |
+  You are a SQL expert.
+  You must follow rules strictly.
+  You can use ### inside content freely.
+
+SCHEMA: |
+  {schema}
+
+EXAMPLES: |
+  {examples}
+
+USER: |
+  {question}
+
+OUTPUT_FORMAT: |
+  Return only SQL.

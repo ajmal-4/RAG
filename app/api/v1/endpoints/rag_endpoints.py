@@ -5,12 +5,15 @@ from pathlib import Path
 import aiofiles
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import StreamingResponse
+from fastapi import BackgroundTasks
 
 from app.api.deps import require_api_key
 from app.core.config import settings
 from app.schemas.rag_api_schema import IngestResponse, ChatRequest
 from app.services.extraction_service import ExtractionService
 from app.services.llm_service import LLMService
+from app.services.ingest_jobs import create_job
+from app.services.ingest_worker import process_ingest_job
 
 router = APIRouter()
 
@@ -22,6 +25,7 @@ llm_service = LLMService()
     "/ingest", response_model=IngestResponse, dependencies=[Depends(require_api_key)]
 )
 async def ingest(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     collection: str = Query(settings.qdrant_collection_name),
 ):
@@ -38,16 +42,30 @@ async def ingest(
     async with aiofiles.open(tmp_path, "wb") as out_file:
         await out_file.write(content)
 
-    ingested_chunks = extraction_service.extract_chunk_upsert_document(
-        file_path=tmp_path, file_metadata=file_metadata
-    )
+    # ✅ Create job
+    job_id = create_job(file.filename)
 
-    return IngestResponse(collection=collection, total_chunks=ingested_chunks)
+    background_tasks.add_task(
+        process_ingest_job,
+        job_id,
+        tmp_path,
+        file_metadata,
+    )
+    # ingested_chunks = extraction_service.extract_chunk_upsert_document(
+    #     file_path=tmp_path, file_metadata=file_metadata
+    # )
+
+    return IngestResponse(
+        collection=collection,
+        job_id=job_id,
+        ingestion_status="queued",
+        ingestion_message="Ingestion Queued in background"
+    )
 
 @router.post("/chat")
 async def chat(request: ChatRequest):
     return StreamingResponse(
-        llm_service.generate_simple_response(request), 
+        llm_service.generate_response(request), 
         media_type="text/plain"
     )
 

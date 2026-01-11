@@ -1,13 +1,15 @@
-from typing import Union
-
 from openai import AsyncOpenAI
+
 from app.core.config import settings
-from langchain_ollama import ChatOllama
+from app.llm.base import BaseLLM
+from app.llm.openai_client import OpenAILLM
+from app.llm.ollama_client import OllamaLLM
+
 
 # Store created clients (singleton-like per model)
-_llm_instances = {}
+_llm_instances: dict[str, BaseLLM] = {}
 
-def get_llm(model_name: str = "deepseek") -> Union[AsyncOpenAI, ChatOllama]:
+def get_llm(model_name: str = "deepseek") -> BaseLLM:
     """Return LLM client for given model from registry."""
 
     if model_name not in settings.llm_models:
@@ -17,13 +19,17 @@ def get_llm(model_name: str = "deepseek") -> Union[AsyncOpenAI, ChatOllama]:
         config = settings.llm_models[model_name]
 
         if config["provider"] == "openrouter":
-            _llm_instances[model_name] = AsyncOpenAI(
+            client = AsyncOpenAI(
                 base_url=config["base_url"],
                 api_key=settings.openrouter_api_key,
             )
+            _llm_instances[model_name] = OpenAILLM(
+                client=client,
+                model=config["model"],
+            )
 
         elif config["provider"] == "local":
-            _llm_instances[model_name] = ChatOllama(
+            _llm_instances[model_name] = OllamaLLM(
                 model=config["model"]
             )
 

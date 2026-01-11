@@ -1,13 +1,33 @@
 from typing import Literal, Union
 
+from docling.datamodel.base_models import InputFormat
 from docling.document_converter import DocumentConverter
+from docling.datamodel.pipeline_options import PdfPipelineOptions
+from docling.document_converter import DocumentConverter, PdfFormatOption
+from docling.backend.pypdfium2_backend import PyPdfiumDocumentBackend
 
 from app.core.config import settings
 
 
 class DoclingService:
     def __init__(self):
-        self.converter = DocumentConverter()
+        # Configure pipeline to handle images
+        pipeline_options = PdfPipelineOptions()
+        pipeline_options.do_ocr = True  # Enable OCR for image-based PDFs
+        pipeline_options.do_table_structure = True  # Extract tables properly
+
+        pipeline_options.generate_page_images = False
+        pipeline_options.generate_picture_images = False
+
+        # Initialize converter with OCR enabled
+        self.converter = DocumentConverter(
+            format_options={
+                InputFormat.PDF: PdfFormatOption(
+                    pipeline_options=pipeline_options,
+                    backend=PyPdfiumDocumentBackend
+                )
+            }
+        )
         self.page_seperator = settings.docling_page_seperator
 
     def extract_text_with_docling(
