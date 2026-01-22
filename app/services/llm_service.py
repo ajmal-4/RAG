@@ -47,6 +47,21 @@ class LLMService:
         async for token in llm_client.stream(messages):
             yield token
 
+    async def generate_agentic_response(self, request: ChatRequest) -> AsyncGenerator[str, None]:
+        model_name = request.model_name or "qwen"
+        llm_client = get_llm(model_name)
+
+        system_prompt = load_prompt("agentic_response")["SYSTEM"]
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=request.question)
+        ]
+
+        # Capture if there are any tool calls and handle them here
+        # If no tool calls, just stream the response
+        async for token in llm_client.stream(messages):
+            yield token
+
     async def summarize_with_kmeans_clustering(
         self, 
         collection_name, 

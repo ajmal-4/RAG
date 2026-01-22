@@ -12,7 +12,7 @@ from app.core.config import settings
 from app.schemas.rag_api_schema import IngestResponse, ChatRequest
 from app.services.extraction_service import ExtractionService
 from app.services.llm_service import LLMService
-from app.services.ingest_jobs import create_job
+from app.services.ingest_jobs import create_job, get_job
 from app.services.ingest_worker import process_ingest_job
 
 router = APIRouter()
@@ -51,9 +51,6 @@ async def ingest(
         tmp_path,
         file_metadata,
     )
-    # ingested_chunks = extraction_service.extract_chunk_upsert_document(
-    #     file_path=tmp_path, file_metadata=file_metadata
-    # )
 
     return IngestResponse(
         collection=collection,
@@ -62,10 +59,24 @@ async def ingest(
         ingestion_message="Ingestion Queued in background"
     )
 
+@router.get("/ingest/status/{job_id}")
+def get_ingest_status(job_id: str):
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return job
+
 @router.post("/chat")
 async def chat(request: ChatRequest):
     return StreamingResponse(
         llm_service.generate_response(request), 
+        media_type="text/plain"
+    )
+
+@router.post("/agentic-chat")
+async def agentic_chat(request: ChatRequest):
+    return StreamingResponse(
+        llm_service.generate_agentic_response(request),
         media_type="text/plain"
     )
 
