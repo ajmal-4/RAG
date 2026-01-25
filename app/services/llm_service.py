@@ -58,7 +58,7 @@ class LLMService:
         model_name = request.model_name or "qwen"
         llm_client = get_llm(model_name)
 
-        if request.method == "k_means":
+        if request.method == "kmeans":
             points = await self.summarize_service.summarize_with_kmeans_clustering(
                 collection_name=request.collection_name,
                 filters=request.filters,
@@ -67,10 +67,14 @@ class LLMService:
                 return_vectors=False
             )
 
-            system_prompt = load_prompt("agentic_response")["SYSTEM"]
+            cleaned_points = [
+                point["payload"] for point in points
+            ]
+
+            system_prompt = load_prompt("summarize_response")["SYSTEM"]
             messages = [
                 SystemMessage(content=system_prompt),
-                HumanMessage(content=points)
+                HumanMessage(content=json.dumps(cleaned_points))
             ]
 
             async for token in llm_client.stream(messages):

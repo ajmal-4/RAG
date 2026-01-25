@@ -80,5 +80,7 @@ async def agentic_chat(request: ChatRequest):
 
 @router.post("/kmeans-summary")
 async def kmeans_summary(request: SummaryRequest):
-    result = await llm_service.summarize(request)
-    return result
+    return StreamingResponse(
+        llm_service.summarize(request),
+        media_type="text/plain"
+    )
