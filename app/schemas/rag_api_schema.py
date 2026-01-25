@@ -13,6 +13,10 @@ class ChatRequest(BaseModel):
 class SummaryRequest(BaseModel):
     collection_name: str = Field(..., description="Name of the collection")
     filters: Optional[dict] = Field(default={}, description="Must and must not filters")
+    method: str = Field(default="kmeans", description="Technique for summarization")
+    model_name: str = Field(
+        "deepseek", description="Model name from registry to use for response"
+    )
 
 class IngestResponse(BaseModel):
     collection: str = Field(..., description="Collection of the vector db")

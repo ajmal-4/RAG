@@ -65,6 +65,13 @@ class Settings(BaseSettings):
             "base_url": "http://localhost:11434",
             "model": "qwen2.5:3b-instruct",
         },
+
+        # GGUF q4 Quantized Model
+        "qwen_tool_call": {
+            "provider": "local",
+            "base_url": "http://localhost:11434",
+            "model": "qwen-tool-router:latest",
+        },
         
         # OpenRouter models (Cloud hosted)
         "deepseek": {
@@ -78,6 +85,11 @@ class Settings(BaseSettings):
             "model": "openai/gpt-4o-mini",
         }
     }
+
+    planner_model: str
+
+    n_clusters: int
+    top_k: int
 
     class Config:
         env_file = env_path

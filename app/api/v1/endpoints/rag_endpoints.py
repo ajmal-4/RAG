@@ -9,15 +9,13 @@ from fastapi import BackgroundTasks
 
 from app.api.deps import require_api_key
 from app.core.config import settings
-from app.schemas.rag_api_schema import IngestResponse, ChatRequest
-from app.services.extraction_service import ExtractionService
 from app.services.llm_service import LLMService
 from app.services.ingest_jobs import create_job, get_job
 from app.services.ingest_worker import process_ingest_job
+from app.schemas.rag_api_schema import IngestResponse, ChatRequest, SummaryRequest
 
 router = APIRouter()
 
-extraction_service = ExtractionService()
 llm_service = LLMService()
 
 
@@ -81,13 +79,6 @@ async def agentic_chat(request: ChatRequest):
     )
 
 @router.post("/kmeans-summary")
-async def kmeans_summary():
-    result = await llm_service.summarize_with_kmeans_clustering(
-        collection_name=settings.qdrant_collection_name,
-        filters=None,
-        n_clusters=2,
-        top_k=1,
-        return_vectors=False
-    )
-
+async def kmeans_summary(request: SummaryRequest):
+    result = await llm_service.summarize(request)
     return result

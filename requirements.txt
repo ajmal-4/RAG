@@ -4,6 +4,7 @@ alembic==1.16.4
 autogen==0.9.9
 docling==2.47.0
 fastapi==0.115.14
+json-repair==0.55.1
 langchain==1.2.3
 langchain-community==0.4.1
 langchain-huggingface==1.2.0
