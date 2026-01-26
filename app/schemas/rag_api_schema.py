@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 
 from pydantic import BaseModel, Field
 
@@ -22,6 +22,13 @@ class WebSearchRequest(BaseModel):
     question: str = Field(..., description="Question for web search")
     model_name: str = Field(
         "deepseek", description="Model name from registry to use for response"
+    )
+
+class ChartGenerationRequest(BaseModel):
+    question: str = Field(..., description="User question for chart generation")
+    data: Any = Field(default=None, description="Data used for chart generation")
+    model_name: str = Field(
+        "deepseek", description="Model name from registry to use for chart generation"
     )
 
 class IngestResponse(BaseModel):

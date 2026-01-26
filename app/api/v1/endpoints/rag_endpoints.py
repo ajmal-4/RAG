@@ -17,7 +17,8 @@ from app.schemas.rag_api_schema import (
     IngestResponse, 
     ChatRequest, 
     SummaryRequest,
-    WebSearchRequest
+    WebSearchRequest,
+    ChartGenerationRequest
 )
 
 router = APIRouter()
@@ -92,8 +93,13 @@ async def kmeans_summary(request: SummaryRequest):
     )
 
 @router.post("/web-search")
-async def kmeans_summary(request: WebSearchRequest):
+async def search_web(request: WebSearchRequest):
     return StreamingResponse(
         llm_service.web_Search(request),
         media_type="text/plain"
     )
+
+@router.post("/generate-chart")
+async def generate_chart(request: ChartGenerationRequest):
+    response = await llm_service.generate_chart(request)
+    return response
