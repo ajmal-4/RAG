@@ -91,6 +91,12 @@ class Settings(BaseSettings):
     n_clusters: int
     top_k: int
 
+    web_search_agent: str
+    
+    tavily_api_key: str
+    tavily_search_depth: str
+
+
     class Config:
         env_file = env_path
         case_sensitive = False

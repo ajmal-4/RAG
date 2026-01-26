@@ -11,17 +11,21 @@ from app.core.llm import get_llm, get_model_id
 from app.services.llm_utils import load_prompt
 from app.schemas.rag_api_schema import ChatRequest
 from app.services.vector_db_agent import VectorDbAgent
+from app.services.summarize_service import SummarizeService
+from app.services.web_service import WebService
 
 
 class AgenticService:
 
     def __init__(self):
         self.vector_db_agent = VectorDbAgent()
+        self.summarize_service = SummarizeService()
+        self.web_service = WebService()
         
         self.tool_registry = {
             "vector_searh": self.vector_db_agent.retrieve_from_qdrant,
-            "summarize": "",
-            "web_search": "",
+            "summarize": self.summarize_service.summarize_with_kmeans_clustering,
+            "web_search": self.web_service.generate_web_search_results,
             "chart_generation": ""
         }
 

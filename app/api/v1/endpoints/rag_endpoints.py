@@ -10,9 +10,15 @@ from fastapi import BackgroundTasks
 from app.api.deps import require_api_key
 from app.core.config import settings
 from app.services.llm_service import LLMService
+from app.services.web_service import WebService
 from app.services.ingest_jobs import create_job, get_job
 from app.services.ingest_worker import process_ingest_job
-from app.schemas.rag_api_schema import IngestResponse, ChatRequest, SummaryRequest
+from app.schemas.rag_api_schema import (
+    IngestResponse, 
+    ChatRequest, 
+    SummaryRequest,
+    WebSearchRequest
+)
 
 router = APIRouter()
 
@@ -82,5 +88,12 @@ async def agentic_chat(request: ChatRequest):
 async def kmeans_summary(request: SummaryRequest):
     return StreamingResponse(
         llm_service.summarize(request),
+        media_type="text/plain"
+    )
+
+@router.post("/web-search")
+async def kmeans_summary(request: WebSearchRequest):
+    return StreamingResponse(
+        llm_service.web_Search(request),
         media_type="text/plain"
     )

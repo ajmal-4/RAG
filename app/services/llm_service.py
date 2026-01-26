@@ -6,15 +6,21 @@ from langchain.messages import SystemMessage, HumanMessage, AIMessage
 from app.core.config import settings
 from app.core.llm import get_llm
 from app.services.llm_utils import load_prompt
-from app.schemas.rag_api_schema import ChatRequest, SummaryRequest
 from app.services.agentic_service import AgenticService
 from app.services.summarize_service import SummarizeService
+from app.services.web_service import WebService
+from app.schemas.rag_api_schema import (
+    ChatRequest, 
+    SummaryRequest,
+    WebSearchRequest
+)
 
 
 class LLMService:
     def __init__(self):
         self.agentic_service = AgenticService()
         self.summarize_service = SummarizeService()
+        self.web_service = WebService()
 
     async def generate_response(self, request: ChatRequest) -> AsyncGenerator[str, None]:
         model_name = request.model_name or "qwen"
@@ -82,3 +88,18 @@ class LLMService:
         
         else:
             pass
+    
+    async def web_Search(self, request: WebSearchRequest):
+        model_name = request.model_name or "qwen"
+        llm_client = get_llm(model_name)
+
+        results = await self.web_service.generate_web_search_results(request.question)
+        
+        system_prompt = load_prompt("web_search_response")["SYSTEM"]
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=json.dumps(results))
+        ]
+
+        async for token in llm_client.stream(messages):
+            yield token

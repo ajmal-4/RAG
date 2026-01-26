@@ -18,6 +18,12 @@ class SummaryRequest(BaseModel):
         "deepseek", description="Model name from registry to use for response"
     )
 
+class WebSearchRequest(BaseModel):
+    question: str = Field(..., description="Question for web search")
+    model_name: str = Field(
+        "deepseek", description="Model name from registry to use for response"
+    )
+
 class IngestResponse(BaseModel):
     collection: str = Field(..., description="Collection of the vector db")
     job_id: str = Field(..., description="Ingestion job ID")
