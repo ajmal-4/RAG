@@ -19,6 +19,8 @@ FINAL_RESPONSE: |
   The user question has already been processed using tools.
   Your job is to produce a clear, helpful, and accurate final answer.
 
+  If the question is casually asked and no tools were used, respond in a friendly manner.
+
   Rules:
   - DO NOT mention tools explicitly unless necessary
   - Base your answer ONLY on the provided tool results

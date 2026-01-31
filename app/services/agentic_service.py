@@ -74,7 +74,7 @@ class AgenticService:
                     logger.error(f"Error executing tool call function : {str(e)}")
                     function_call_result = None
             else:
-                logger.error(f"Unknown function : {str(e)}")
+                logger.error(f"Unknown function call: {tool_name}")
                 function_call_result = None
                 
             results.append({"tool": tool_name, "arguments": arguments, "tool_result": function_call_result})
