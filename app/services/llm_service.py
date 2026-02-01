@@ -52,6 +52,9 @@ class LLMService:
         ]
 
         planner_client = get_llm(settings.planner_model)
+        if settings.planner_model != "qwen_tool_call":
+            # Bind tools functionality to planner client
+            pass
         planner_response = await planner_client.invoke(messages)
         executed_response = await self.agentic_service.execute_plan(planner_response)
 
