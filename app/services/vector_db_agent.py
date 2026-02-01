@@ -46,7 +46,7 @@ class VectorDbAgent:
             must_not=must_not_conditions if must_not_conditions else None
         )
 
-    def retrieve_from_qdrant(
+    async def retrieve_from_qdrant(
         self, query, metadata: Optional[dict] = {}, collection_name=""
     ):
         """Retrieve from semantic chunks from vector db"""

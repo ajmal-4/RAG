@@ -60,6 +60,7 @@ class AgenticService:
         [{"tool": "vector_search", "arguments": {"query":"invoice number id"}}]
         """
         results = []
+        function_call_result = None
         
         for tool in tools:
 
@@ -69,13 +70,12 @@ class AgenticService:
             if tool_name in self.tool_registry:
                
                 try:
-                    function_call_result = self.tool_registry[tool_name](**arguments)
+                    function_call_result = await self.tool_registry[tool_name](**arguments)
                 except Exception as e:
                     logger.error(f"Error executing tool call function : {str(e)}")
-                    function_call_result = None
+
             else:
                 logger.error(f"Unknown function call: {tool_name}")
-                function_call_result = None
                 
             results.append({"tool": tool_name, "arguments": arguments, "tool_result": function_call_result})
         
