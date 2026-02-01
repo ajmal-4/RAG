@@ -1,4 +1,4 @@
-from openai import AsyncOpenAI
+from langchain_openai import ChatOpenAI
 
 from app.core.config import settings
 from app.llm.base import BaseLLM
@@ -19,10 +19,13 @@ def get_llm(model_name: str = "deepseek") -> BaseLLM:
         config = settings.llm_models[model_name]
 
         if config["provider"] == "openrouter":
-            client = AsyncOpenAI(
-                base_url=config["base_url"],
-                api_key=settings.openrouter_api_key,
+            client = ChatOpenAI(
+                model=config["model"],
+                openai_api_key=settings.openrouter_api_key,
+                openai_api_base=config["base_url"],
+                streaming=True
             )
+
             _llm_instances[model_name] = OpenAILLM(
                 client=client,
                 model=config["model"],
