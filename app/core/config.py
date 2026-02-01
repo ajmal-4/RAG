@@ -57,6 +57,8 @@ class Settings(BaseSettings):
 
     prompt_path: str = "app/prompts"
 
+    history_limit: int
+
     # Define model registry
     llm_models: dict = {
         # Locally hosted models 

@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Optional, Any, List, Dict
 
 from pydantic import BaseModel, Field
 
@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 # Requests
 class ChatRequest(BaseModel):
     question: str = Field(..., description="Question to ask the LLM")
+    history: Optional[List[Dict[str, Any]]] = Field(default=[], description="Chat history")
     model_name: str = Field(
         "deepseek", description="Model name from registry to use for response"
     )

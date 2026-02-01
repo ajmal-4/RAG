@@ -5,7 +5,7 @@ from langchain.messages import SystemMessage, HumanMessage, AIMessage
 
 from app.core.config import settings
 from app.core.llm import get_llm
-from app.services.llm_utils import load_prompt
+from app.services.llm_utils import load_prompt, process_chat_history
 from app.services.agentic_service import AgenticService
 from app.services.summarize_service import SummarizeService
 from app.services.web_service import WebService
@@ -30,8 +30,11 @@ class LLMService:
         llm_client = get_llm(model_name)
 
         system_prompt = load_prompt("simple_response")["SYSTEM"]
+        if request.history:
+            history_messages = process_chat_history(request.history)
         messages = [
             SystemMessage(content=system_prompt),
+            *history_messages,
             HumanMessage(content=request.question)
         ]
 
