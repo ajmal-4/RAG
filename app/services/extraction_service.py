@@ -19,7 +19,7 @@ class ExtractionService:
             chunk_size=settings.chunk_split_size,
             chunk_overlap=settings.chunk_split_overlap,
         )
-        self.qdrant_client = QdrantClient(url=self.qdrant_url)
+        self.qdrant_client = QdrantClient(url=settings.qdrant_url)
         self.embeddings = get_embeddings()
         self._load_vector_db_creds()
 

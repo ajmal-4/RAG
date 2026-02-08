@@ -14,3 +14,8 @@ class OpenAILLM(BaseLLM):
 
         async for chunk in self.client.astream(messages):
             yield chunk.content
+    
+    async def invoke(self, messages: List):
+
+        response = await self.client.ainvoke(messages)
+        return response

@@ -1,15 +1,11 @@
 import json
 from json_repair import repair_json
-from typing import List, Dict, Any, AsyncGenerator
+from typing import List, Dict
 
-import numpy as np
-from sklearn.cluster import KMeans
-from langchain.messages import SystemMessage, HumanMessage
+from langchain_core.tools import tool
+from langchain.messages import AIMessage
 
 from app.core.logger import logger
-from app.core.llm import get_llm, get_model_id
-from app.services.llm_utils import load_prompt
-from app.schemas.rag_api_schema import ChatRequest
 from app.services.vector_db_agent import VectorDbAgent
 from app.services.summarize_service import SummarizeService
 from app.services.web_service import WebService
@@ -28,7 +24,21 @@ class AgenticService:
             "web_search": self.web_service.generate_web_search_results,
             "chart_generation": ""
         }
-
+    
+    @tool
+    async def vector_search(self, query: str) -> str:
+        """Search internal vector database"""
+        return await self.vector_db_agent.retrieve_from_qdrant(query=query)
+    
+    @tool
+    async def web_search(self, query: str) -> str:
+        """Search web for information"""
+        return await self.web_service.generate_web_search_results(query=query)
+    
+    @tool
+    async def summarize(self, text: str) -> str:
+        """Summarize given text"""
+        return await self.summarize_service.summarize_with_kmeans_clustering(text=text)
 
     def parse_tool_calls(self, model_output: str):
         """
@@ -68,6 +78,8 @@ class AgenticService:
             arguments = tool["arguments"]
 
             if tool_name in self.tool_registry:
+
+                # TODO: Implement argument construction/validation
                
                 try:
                     function_call_result = await self.tool_registry[tool_name](**arguments)
@@ -87,8 +99,10 @@ class AgenticService:
         # Parse the response into desired format
         if isinstance(planner_response, str):
             tool_calls = self.parse_tool_calls(planner_response)
-        else:
-            pass
+
+        elif isinstance(planner_response, AIMessage):
+            tool_calls = planner_response.tool_calls
+            tool_calls = [{"tool": tool_call["name"], "arguments": tool_call["args"]} for tool_call in tool_calls]
 
         # Process the tool calls one by one   
         tool_call_result = await self.process_tool_calls(tool_calls)

@@ -24,10 +24,16 @@ class LLMService:
         self.summarize_service = SummarizeService()
         self.web_service = WebService()
         self.chart_agent = ChartAgent()
+        self.agentic_tools = [
+            self.agentic_service.vector_search,
+            self.agentic_service.summarize,
+            self.agentic_service.web_search
+        ]
 
     async def generate_response(self, request: ChatRequest) -> AsyncGenerator[str, None]:
         model_name = request.model_name or "qwen"
         llm_client = get_llm(model_name)
+        history_messages = []
 
         system_prompt = load_prompt("simple_response")["SYSTEM"]
         if request.history:
@@ -53,8 +59,8 @@ class LLMService:
 
         planner_client = get_llm(settings.planner_model)
         if settings.planner_model != "qwen_tool_call":
-            # Bind tools functionality to planner client
-            pass
+            planner_client.client = planner_client.client.bind_tools(self.agentic_tools)
+
         planner_response = await planner_client.invoke(messages)
         executed_response = await self.agentic_service.execute_plan(planner_response)
 
