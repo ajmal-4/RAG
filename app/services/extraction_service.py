@@ -1,5 +1,9 @@
+from uuid import uuid4
+
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Qdrant
+from langchain_core.documents import Document
+from qdrant_client import QdrantClient
+from qdrant_client.models import PointStruct
 
 from app.core.config import settings
 from app.core.embedding import get_embeddings
@@ -15,6 +19,7 @@ class ExtractionService:
             chunk_size=settings.chunk_split_size,
             chunk_overlap=settings.chunk_split_overlap,
         )
+        self.qdrant_client = QdrantClient(url=self.qdrant_url)
         self.embeddings = get_embeddings()
         self._load_vector_db_creds()
 
@@ -55,6 +60,29 @@ class ExtractionService:
             pass
 
         return page_content_mapping
+    
+    def upsert_to_qdrant(self, documents: Document, vectors: list[list[float]]):
+
+        points = []
+        for doc, vec in zip(documents, vectors):
+            points.append(
+                PointStruct(
+                    id=str(uuid4()),
+                    vector=vec,
+                    payload={
+                        "metadata": doc.metadata,
+                        "page_content": doc.page_content,
+                    },
+                )
+            )
+
+        self.qdrant_client.upsert(
+            collection_name=self.qdrant_collection_name,
+            points=points
+        )
+
+        print(f"Upserted {len(points)} chunks")
+        return len(points)
 
     def chunk_and_upsert_documents(
         self, extracted_contents: list[dict], file_metadata: dict
@@ -80,17 +108,19 @@ class ExtractionService:
                         }
                     )
                 all_docs.extend(page_chunks)
+        
+        # -------- Batch Embedding --------
+        texts = [doc.page_content for doc in all_docs]
+        BATCH_SIZE = settings.embedding_batch_size
 
-        # Upsert all at once to Qdrant - Currently only qdrant
-        _ = Qdrant.from_documents(
-            documents=all_docs,
-            embedding=self.embeddings,
-            url=self.qdrant_url,
-            collection_name=self.qdrant_collection_name,
-        )
-
-        print(f"Appended {len(all_docs)} no.of chunks")
-        return len(all_docs)
+        vectors = []
+        for i in range(0, len(texts), BATCH_SIZE):
+            batch = texts[i : i + BATCH_SIZE]
+            batch_vecs = self.embeddings.embed_documents(batch)
+            vectors.extend(batch_vecs)
+        
+        upserted_chunks = self.upsert_to_qdrant(all_docs, vectors)
+        return upserted_chunks
 
     def extract_chunk_upsert_document(self, file_path: str, file_metadata: dict):
         if self.is_docling_retriever:

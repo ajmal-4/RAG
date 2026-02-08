@@ -98,6 +98,7 @@ class Settings(BaseSettings):
     tavily_api_key: str
     tavily_search_depth: str
 
+    embedding_batch_size: int
 
     class Config:
         env_file = env_path
